@@ -17,8 +17,14 @@
     <script type="text/jsx">
 
       var ArticleBox = React.createClass({
-        loadArticles: function(){
-          var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
+        loadArticles: function(name){
+
+          if (name !== undefined){
+            var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?q='+name+'&api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
+          } else {
+            var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
+          }
+
           var request = $.get(url);
 
           $.when(request).done(function(data){
@@ -35,20 +41,53 @@
         },
         render: function(){
           return(
-            <div>
+            <div className="container">
+              <ArticleSearchForm onSearchSubmit={this.loadArticles} />
               <ArticleList docs={this.state.docs} />
             </div>
           );
         }
       });
 
+      var ArticleSearchForm = React.createClass({
+        handleSubmit: function(e){
+          e.preventDefault();
+          var name = this.refs.search_query.getDOMNode().value.trim();
+          this.props.onSearchSubmit(name);
+        },
+        render: function(){
+          return(
+            <form onSubmit={this.handleSubmit}>
+              <input type="text" className="form-control" placeholder="Search for Article" ref="search_query" />
+              <br />
+              <input type="submit" value="Search" className="btn btn-danger" />
+              <hr />
+            </form>
+          )
+        }
+      });
+
       var ArticleList = React.createClass({
+        decodeHTML :function(string) {
+          var map = {"gt":">" /* , … */};
+          return string.replace(/&(#(?:x[0-9a-f]+|\d+)|[a-z]+);?/gi, function($0, $1) {
+            if ($1[0] === "#") {
+              return String.fromCharCode($1[1].toLowerCase() === "x" ? parseInt($1.substr(2), 16)  : parseInt($1.substr(1), 10));
+            } else {
+              return map.hasOwnProperty($1) ? map[$1] : $0;
+            }
+          });
+        },
         render: function(){
           var nodes = this.props.docs.map(function(doc, index){
-            return <Article main_headline={doc.headline.main} url={doc.web_url} key={index} />
-          });
+            main_headline = this.decodeHTML(doc.headline.main);
+            return <Article main_headline={main_headline} url={doc.web_url} key={index} />
+          }.bind(this));
           return(
-            <div>{nodes}</div>
+            <div>
+              <h1>Articles</h1>
+              {nodes}
+            </div>
           )
         }
       });
