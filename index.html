@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <title>Hello React</title>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="styles/site.css" rel="stylesheet">
+    <script src="https://fb.me/react-0.13.3.js"></script>
+    <script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  </head>
+  <body>
+    <div class="content">
+    </div>
+
+    <script type="text/jsx">
+      var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
+      var request = $.get(url);
+
+      $.when(request).done(function(data){
+          console.log(data);
+      });
+
+    </script>
+  </body>
+</html>
