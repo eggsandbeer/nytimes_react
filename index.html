@@ -1,23 +1,69 @@
 <html>
   <head>
-    <title>Hello React</title>
+    <title>NYT React</title>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles/site.css" rel="stylesheet">
     <script src="https://fb.me/react-0.13.3.js"></script>
     <script src="https://fb.me/JSXTransformer-0.13.3.js"></script>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script>
   </head>
   <body>
     <div class="content">
     </div>
 
     <script type="text/jsx">
-      var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
-      var request = $.get(url);
 
-      $.when(request).done(function(data){
-          console.log(data);
+      var ArticleBox = React.createClass({
+        loadArticles: function(){
+          var url = 'http://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=96a54f82d8d8747c8134c0532be19a60:5:71553025'
+          var request = $.get(url);
+
+          $.when(request).done(function(data){
+            this.setState({docs: data.response.docs});
+          }.bind(this));
+        },
+        getInitialState: function(){
+          return {
+            docs: []
+          }
+        },
+        componentWillMount: function(){
+          this.loadArticles();
+        },
+        render: function(){
+          return(
+            <div>
+              <ArticleList docs={this.state.docs} />
+            </div>
+          );
+        }
       });
+
+      var ArticleList = React.createClass({
+        render: function(){
+          var nodes = this.props.docs.map(function(doc, index){
+            return <Article main_headline={doc.headline.main} url={doc.web_url} key={index} />
+          });
+          return(
+            <div>{nodes}</div>
+          )
+        }
+      });
+
+      var Article = React.createClass({
+        render: function(){
+          return(
+            <div><a href={this.props.url} target="_blank">{this.props.main_headline}</a></div>
+          )
+        }
+      });
+
+      var content = document.querySelector('.content');
+
+      React.render(<ArticleBox />, content);
 
     </script>
   </body>
